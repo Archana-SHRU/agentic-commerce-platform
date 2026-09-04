@@ -1,6 +1,6 @@
-# AI-Powered Agentic Commerce Platform
+﻿# AI-Powered Agentic Commerce Platform
 
-Production-quality AI commerce platform built for **Razorpay Buildathon 2026**.
+An intelligent, AI-powered commerce platform that combines conversational shopping assistance with personalized product recommendations and direct access to brand experts.
 
 ## Problem Statement
 
@@ -24,37 +24,36 @@ The goal of this project is to build an intelligent commerce platform where AI-a
 
 # Proposed Solution
 
-This project introduces an **AI-Powered Agentic Commerce Platform** that helps customers discover products, interact with an intelligent shopping assistant, compare products, complete purchases, and receive support.
+Our solution is an **AI-powered Agentic Commerce Platform** that transforms traditional online shopping into an intelligent, interactive, and personalized experience.
 
-The platform is designed with two separate user experiences:
+Instead of making customers search through hundreds of products, the platform uses an **AI Shopping Assistant** to understand customer requirements through natural conversation. The AI can recommend suitable products, explain product features, compare alternatives, and guide users throughout their buying journey.
 
-## Customer Platform
+A key feature of the platform is the **AI-to-Human Expert Connection System**. When AI assistance is not sufficient or a customer needs detailed guidance, the platform can connect them with a relevant **brand representative or product expert** through chat, voice, or video consultation.
 
-Customers can:
+This creates a seamless transition from intelligent AI assistance to trusted human expertise.
 
-- Browse and search products
-- Discover products using AI assistance
-- Get personalized product recommendations
-- Compare products
-- Add products to cart
-- Complete secure payments
-- View order history
-- Track orders
-- Contact support experts
-- Access chat, voice, and video support interfaces
+The platform also provides a dedicated merchant ecosystem where merchants can securely manage products, catalogs, and customer orders through a separate dashboard.
 
-## Merchant Platform
+### The Complete Solution Combines
 
-Merchants can:
+- 🤖 AI-Powered Shopping Assistant for conversational product discovery
+- 🎯 Personalized Product Recommendations based on customer requirements
+- 🔍 Smart Product Search and Discovery
+- ⚖️ Product Comparison for better purchasing decisions
+- 🧠 AI-to-Human Escalation when expert assistance is required
+- 📞 Voice Consultation with Brand or Product Experts
+- 🎥 Video Consultation for detailed product guidance
+- 💬 Real-Time Chat Support
+- 🛒 Smart Shopping Cart and Checkout Experience
+- 💳 Secure Online Payment Integration
+- 📦 Order Tracking and Order Management
+- 🏪 Dedicated Merchant Dashboard
+- 📊 Merchant Product and Order Management
+- 🔐 Separate Authentication and Role-Based Access for Customers and Merchants
 
-- Register and log in separately from customers
-- Manage products
-- Add and update product information
-- Monitor customer orders
-- View payment-related information
-- Manage their product catalog
+The goal is to create a unified commerce ecosystem where **AI provides instant intelligent assistance, while human brand experts provide trusted personalized guidance whenever required**.
 
-This separation ensures that customers and merchants have different dashboards and workflows based on their roles.
+This hybrid approach makes online shopping more interactive, reliable, and customer-centric while helping merchants better manage their products and connect with potential customers.
 
 ---
 
@@ -243,127 +242,127 @@ The project follows a modular full-stack architecture.
 
 ```text
 AI Agent Commerce
-│
-├── frontend
-│   │
-│   ├── src
-│   │   ├── components
-│   │   │   └── Reusable UI components
-│   │   │
-│   │   ├── pages
-│   │   │   └── Application pages
-│   │   │
-│   │   ├── context
-│   │   │   └── Authentication and global state
-│   │   │
-│   │   ├── services
-│   │   │   └── API communication
-│   │   │
-│   │   ├── types
-│   │   │   └── TypeScript interfaces
-│   │   │
-│   │   ├── utils
-│   │   │   └── Utility functions
-│   │   │
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   │
-│   ├── package.json
-│   └── README.md
-│
-├── backend
-│   │
-│   ├── app
-│   │   │
-│   │   ├── api
-│   │   │   └── API routes
-│   │   │
-│   │   ├── models
-│   │   │   └── Database models
-│   │   │
-│   │   ├── schemas
-│   │   │   └── Request and response schemas
-│   │   │
-│   │   ├── services
-│   │   │   └── Business logic
-│   │   │
-│   │   ├── agents
-│   │   │   └── AI agent logic
-│   │   │
-│   │   ├── db
-│   │   │   └── Database configuration
-│   │   │
-│   │   ├── core
-│   │   │   └── Application configuration
-│   │   │
-│   │   └── main.py
-│   │
-│   ├── requirements.txt
-│   └── README.md
-│
-├── docs
-│   │
-│   ├── architecture
-│   │   └── System architecture documentation
-│   │
-│   └── workflow
-│       └── Application workflow documentation
-│
-├── .env.example
-├── .gitignore
-└── README.md
+â”‚
+â”œâ”€â”€ frontend
+â”‚   â”‚
+â”‚   â”œâ”€â”€ src
+â”‚   â”‚   â”œâ”€â”€ components
+â”‚   â”‚   â”‚   â””â”€â”€ Reusable UI components
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ pages
+â”‚   â”‚   â”‚   â””â”€â”€ Application pages
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ context
+â”‚   â”‚   â”‚   â””â”€â”€ Authentication and global state
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ services
+â”‚   â”‚   â”‚   â””â”€â”€ API communication
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ types
+â”‚   â”‚   â”‚   â””â”€â”€ TypeScript interfaces
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ utils
+â”‚   â”‚   â”‚   â””â”€â”€ Utility functions
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ App.tsx
+â”‚   â”‚   â””â”€â”€ main.tsx
+â”‚   â”‚
+â”‚   â”œâ”€â”€ package.json
+â”‚   â””â”€â”€ README.md
+â”‚
+â”œâ”€â”€ backend
+â”‚   â”‚
+â”‚   â”œâ”€â”€ app
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ api
+â”‚   â”‚   â”‚   â””â”€â”€ API routes
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ models
+â”‚   â”‚   â”‚   â””â”€â”€ Database models
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ schemas
+â”‚   â”‚   â”‚   â””â”€â”€ Request and response schemas
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ services
+â”‚   â”‚   â”‚   â””â”€â”€ Business logic
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ agents
+â”‚   â”‚   â”‚   â””â”€â”€ AI agent logic
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ db
+â”‚   â”‚   â”‚   â””â”€â”€ Database configuration
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ core
+â”‚   â”‚   â”‚   â””â”€â”€ Application configuration
+â”‚   â”‚   â”‚
+â”‚   â”‚   â””â”€â”€ main.py
+â”‚   â”‚
+â”‚   â”œâ”€â”€ requirements.txt
+â”‚   â””â”€â”€ README.md
+â”‚
+â”œâ”€â”€ docs
+â”‚   â”‚
+â”‚   â”œâ”€â”€ architecture
+â”‚   â”‚   â””â”€â”€ System architecture documentation
+â”‚   â”‚
+â”‚   â””â”€â”€ workflow
+â”‚       â””â”€â”€ Application workflow documentation
+â”‚
+â”œâ”€â”€ .env.example
+â”œâ”€â”€ .gitignore
+â””â”€â”€ README.md
 Customer Journey
 Customer
-   │
-   ▼
+   â”‚
+   â–¼
 Signup / Login
-   │
-   ▼
+   â”‚
+   â–¼
 Browse Products
-   │
-   ▼
+   â”‚
+   â–¼
 AI Shopping Assistant
-   │
-   ▼
+   â”‚
+   â–¼
 Product Recommendation
-   │
-   ▼
+   â”‚
+   â–¼
 Product Details / Comparison
-   │
-   ▼
+   â”‚
+   â–¼
 Add to Cart
-   │
-   ▼
+   â”‚
+   â–¼
 Checkout
-   │
-   ▼
+   â”‚
+   â–¼
 Razorpay Payment
-   │
-   ▼
+   â”‚
+   â–¼
 Order Confirmation
-   │
-   ▼
+   â”‚
+   â–¼
 My Orders
 
 
 Merchant Journey
 Merchant
-   │
-   ▼
+   â”‚
+   â–¼
 Merchant Login
-   │
-   ▼
+   â”‚
+   â–¼
 Merchant Dashboard
-   │
-   ▼
+   â”‚
+   â–¼
 Manage Products
-   │
-   ├── Add Products
-   ├── Update Products
-   └── Manage Catalog
-   │
-   ▼
+   â”‚
+   â”œâ”€â”€ Add Products
+   â”œâ”€â”€ Update Products
+   â””â”€â”€ Manage Catalog
+   â”‚
+   â–¼
 Receive Orders
-   │
-   ▼
+   â”‚
+   â–¼
 Manage Order Status
