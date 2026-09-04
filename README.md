@@ -240,93 +240,87 @@ The platform is structured to support secure payment processing using Razorpay A
 
 The project follows a modular full-stack architecture.
 
-`AI Agent Commerce
+# Project Architecture
+
+```text
+AI Agent Commerce
 │
 ├── frontend
 │   ├── src
-│   │   ├── components     # Reusable UI components
-│   │   ├── pages          # Application pages
-│   │   ├── context        # Authentication and global state
-│   │   ├── services       # API communication
-│   │   ├── types          # TypeScript interfaces
-│   │   ├── utils          # Utility functions
+│   │   ├── components
+│   │   ├── pages
+│   │   ├── context
+│   │   ├── services
+│   │   ├── types
+│   │   ├── utils
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   │
-│   ├── package.json
-│   └── README.md
+│   └── package.json
 │
 ├── backend
 │   ├── app
-│   │   ├── api            # API routes
-│   │   ├── models         # Database models
-│   │   ├── schemas        # Request and response schemas
-│   │   ├── services       # Business logic
-│   │   ├── db             # Database configuration
-│   │   ├── core           # Application configuration
+│   │   ├── api
+│   │   ├── models
+│   │   ├── schemas
+│   │   ├── services
+│   │   ├── db
+│   │   ├── core
 │   │   └── main.py
 │   │
-│   ├── alembic            # Database migrations
+│   ├── alembic
 │   └── requirements.txt
 │
 ├── .env.example
 ├── .gitignore
 └── README.md
-Customer Journey
-Customer
-   │
-   ▼
-Signup / Login
-   │
-   ▼
-Browse Products
-   │
-   ▼
-AI Shopping Assistant
-   │
-   ▼
-Personalized Recommendations
-   │
-   ▼
-Product Details / Comparison
-   │
-   ▼
-Need More Help?
-   │
-   ├── No ──► Add to Cart
-   │
-   └── Yes ──► Connect with Brand Expert
-                    │
-                    ├── Chat
-                    ├── Voice Call
-                    └── Video Consultation
-   │
-   ▼
-Checkout
-   │
-   ▼
-Secure Payment
-   │
-   ▼
-Order Confirmation
-   │
-   ▼
-My Orders
-Merchant Journey
-Merchant
-   │
-   ▼
-Merchant Login
-   │
-   ▼
-Merchant Dashboard
-   │
-   ├── Manage Products
-   │      ├── Add Products
-   │      ├── Update Products
-   │      └── Manage Catalog
-   │
-   ├── Receive Orders
-   │
-   └── Manage Order Status
+```
 
+# Customer Journey
+
+```text
+Customer
+   ↓
+Signup / Login
+   ↓
+Browse Products
+   ↓
+AI Shopping Assistant
+   ↓
+Personalized Recommendations
+   ↓
+Product Details / Comparison
+   ↓
+Connect with Brand Expert (if needed)
+   ↓
+Chat / Voice / Video Consultation
+   ↓
+Add to Cart
+   ↓
+Checkout
+   ↓
+Secure Payment
+   ↓
+Order Confirmation
+   ↓
+My Orders
+```
+
+# Merchant Journey
+
+```text
+Merchant
+   ↓
+Merchant Login
+   ↓
+Merchant Dashboard
+   ↓
+Manage Products
+   ├── Add Products
+   ├── Update Products
+   └── Manage Catalog
+   ↓
+Receive Orders
+   ↓
+Manage Order Status
+```
