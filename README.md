@@ -240,129 +240,93 @@ The platform is structured to support secure payment processing using Razorpay A
 
 The project follows a modular full-stack architecture.
 
-```text
-AI Agent Commerce
-â”‚
-â”œâ”€â”€ frontend
-â”‚   â”‚
-â”‚   â”œâ”€â”€ src
-â”‚   â”‚   â”œâ”€â”€ components
-â”‚   â”‚   â”‚   â””â”€â”€ Reusable UI components
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ pages
-â”‚   â”‚   â”‚   â””â”€â”€ Application pages
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ context
-â”‚   â”‚   â”‚   â””â”€â”€ Authentication and global state
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ services
-â”‚   â”‚   â”‚   â””â”€â”€ API communication
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ types
-â”‚   â”‚   â”‚   â””â”€â”€ TypeScript interfaces
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ utils
-â”‚   â”‚   â”‚   â””â”€â”€ Utility functions
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ App.tsx
-â”‚   â”‚   â””â”€â”€ main.tsx
-â”‚   â”‚
-â”‚   â”œâ”€â”€ package.json
-â”‚   â””â”€â”€ README.md
-â”‚
-â”œâ”€â”€ backend
-â”‚   â”‚
-â”‚   â”œâ”€â”€ app
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ api
-â”‚   â”‚   â”‚   â””â”€â”€ API routes
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ models
-â”‚   â”‚   â”‚   â””â”€â”€ Database models
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ schemas
-â”‚   â”‚   â”‚   â””â”€â”€ Request and response schemas
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ services
-â”‚   â”‚   â”‚   â””â”€â”€ Business logic
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ agents
-â”‚   â”‚   â”‚   â””â”€â”€ AI agent logic
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ db
-â”‚   â”‚   â”‚   â””â”€â”€ Database configuration
-â”‚   â”‚   â”‚
-â”‚   â”‚   â”œâ”€â”€ core
-â”‚   â”‚   â”‚   â””â”€â”€ Application configuration
-â”‚   â”‚   â”‚
-â”‚   â”‚   â””â”€â”€ main.py
-â”‚   â”‚
-â”‚   â”œâ”€â”€ requirements.txt
-â”‚   â””â”€â”€ README.md
-â”‚
-â”œâ”€â”€ docs
-â”‚   â”‚
-â”‚   â”œâ”€â”€ architecture
-â”‚   â”‚   â””â”€â”€ System architecture documentation
-â”‚   â”‚
-â”‚   â””â”€â”€ workflow
-â”‚       â””â”€â”€ Application workflow documentation
-â”‚
-â”œâ”€â”€ .env.example
-â”œâ”€â”€ .gitignore
-â””â”€â”€ README.md
+`AI Agent Commerce
+│
+├── frontend
+│   ├── src
+│   │   ├── components     # Reusable UI components
+│   │   ├── pages          # Application pages
+│   │   ├── context        # Authentication and global state
+│   │   ├── services       # API communication
+│   │   ├── types          # TypeScript interfaces
+│   │   ├── utils          # Utility functions
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   │
+│   ├── package.json
+│   └── README.md
+│
+├── backend
+│   ├── app
+│   │   ├── api            # API routes
+│   │   ├── models         # Database models
+│   │   ├── schemas        # Request and response schemas
+│   │   ├── services       # Business logic
+│   │   ├── db             # Database configuration
+│   │   ├── core           # Application configuration
+│   │   └── main.py
+│   │
+│   ├── alembic            # Database migrations
+│   └── requirements.txt
+│
+├── .env.example
+├── .gitignore
+└── README.md
 Customer Journey
 Customer
-   â”‚
-   â–¼
+   │
+   ▼
 Signup / Login
-   â”‚
-   â–¼
+   │
+   ▼
 Browse Products
-   â”‚
-   â–¼
+   │
+   ▼
 AI Shopping Assistant
-   â”‚
-   â–¼
-Product Recommendation
-   â”‚
-   â–¼
+   │
+   ▼
+Personalized Recommendations
+   │
+   ▼
 Product Details / Comparison
-   â”‚
-   â–¼
-Add to Cart
-   â”‚
-   â–¼
+   │
+   ▼
+Need More Help?
+   │
+   ├── No ──► Add to Cart
+   │
+   └── Yes ──► Connect with Brand Expert
+                    │
+                    ├── Chat
+                    ├── Voice Call
+                    └── Video Consultation
+   │
+   ▼
 Checkout
-   â”‚
-   â–¼
-Razorpay Payment
-   â”‚
-   â–¼
+   │
+   ▼
+Secure Payment
+   │
+   ▼
 Order Confirmation
-   â”‚
-   â–¼
+   │
+   ▼
 My Orders
-
-
 Merchant Journey
 Merchant
-   â”‚
-   â–¼
+   │
+   ▼
 Merchant Login
-   â”‚
-   â–¼
+   │
+   ▼
 Merchant Dashboard
-   â”‚
-   â–¼
-Manage Products
-   â”‚
-   â”œâ”€â”€ Add Products
-   â”œâ”€â”€ Update Products
-   â””â”€â”€ Manage Catalog
-   â”‚
-   â–¼
-Receive Orders
-   â”‚
-   â–¼
-Manage Order Status
+   │
+   ├── Manage Products
+   │      ├── Add Products
+   │      ├── Update Products
+   │      └── Manage Catalog
+   │
+   ├── Receive Orders
+   │
+   └── Manage Order Status
+
