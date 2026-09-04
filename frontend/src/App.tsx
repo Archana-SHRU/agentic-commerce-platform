@@ -1,87 +1,34 @@
-import { useState } from 'react'
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useNavigate,
-} from 'react-router-dom'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
-import { Header, ToastContainer } from './components'
+import { Header, RequireAuth, ToastContainer } from './components'
 import {
   AuditTrailPage,
   CartPage,
   CheckoutPage,
   ComparePage,
+  ForgotPasswordPage,
   HomePage,
+  LoginPage,
   MerchantCatalog,
   MerchantDashboard,
   MerchantOrders,
+  OrderConfirmationPage,
+  OrdersPage,
+  ProfilePage,
   ProductDetailsPage,
   ProductsPage,
+  ResetPasswordPage,
+  SignupPage,
   SupportPage,
 } from './pages'
 import { ShopPage } from './pages/ShopPage'
 
-type UserRole = 'customer' | 'merchant'
-
 function AppContent() {
-  const [userRole, setUserRole] = useState<UserRole>('customer')
-  const navigate = useNavigate()
-
-  const handleRoleChange = (role: UserRole) => {
-    setUserRole(role)
-
-    if (role === 'merchant') {
-      navigate('/merchant/dashboard')
-      return
-    }
-
-    navigate('/')
-  }
-
-  const roleBadgeText =
-    userRole === 'customer' ? 'Customer View' : 'Merchant View'
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900">
       <ToastContainer />
 
-      <Header userRole={userRole} />
-
-      <div className="border-b border-amber-200 bg-amber-50/90 backdrop-blur">
-        <div className="max-w-7xl mx-auto flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <div className="text-amber-900">
-            <span className="font-semibold">{roleBadgeText}</span>
-            <span className="ml-2 text-amber-700">
-              Demo role switcher for local testing
-            </span>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleRoleChange('customer')}
-              className={`rounded px-3 py-1 text-xs font-medium transition ${
-                userRole === 'customer'
-                  ? 'bg-amber-200 text-amber-950'
-                  : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-              }`}
-            >
-              Customer
-            </button>
-
-            <button
-              onClick={() => handleRoleChange('merchant')}
-              className={`rounded px-3 py-1 text-xs font-medium transition ${
-                userRole === 'merchant'
-                  ? 'bg-amber-200 text-amber-950'
-                  : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-              }`}
-            >
-              Merchant
-            </button>
-          </div>
-        </div>
-      </div>
+      <Header />
 
       <main>
         <Routes>
@@ -91,8 +38,40 @@ function AppContent() {
           <Route path="/product/:id" element={<ProductDetailsPage />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route
+            path="/checkout"
+            element={
+              <RequireAuth>
+                <CheckoutPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <RequireAuth>
+                <OrdersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <RequireAuth>
+                <ProfilePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/order-confirmation/:orderId"
+            element={<OrderConfirmationPage />}
+          />
           <Route path="/support" element={<SupportPage />} />
+
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
           <Route path="/merchant/catalog" element={<MerchantCatalog />} />
@@ -102,7 +81,7 @@ function AppContent() {
           <Route
             path="*"
             element={
-              <div className="min-h-[60vh] flex items-center justify-center px-4">
+              <div className="flex min-h-[60vh] items-center justify-center px-4">
                 <div className="text-center">
                   <h1 className="mb-3 text-5xl font-bold text-slate-900">
                     404
@@ -122,12 +101,10 @@ function AppContent() {
       </main>
 
       <footer className="mt-16 bg-slate-950 py-12 text-slate-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <div>
-              <h3 className="mb-3 text-lg font-bold text-white">
-                RazorCart AI
-              </h3>
+              <h3 className="mb-3 text-lg font-bold text-white">RazorCart AI</h3>
 
               <p className="text-sm text-slate-400">
                 AI-powered shopping. Razorpay-powered checkout.
@@ -145,6 +122,12 @@ function AppContent() {
                 </a>
                 <a href="/products" className="block hover:text-white">
                   Products
+                </a>
+                <a href="/orders" className="block hover:text-white">
+                  Orders
+                </a>
+                <a href="/profile" className="block hover:text-white">
+                  Profile
                 </a>
                 <a href="/cart" className="block hover:text-white">
                   Cart
@@ -186,7 +169,7 @@ function AppContent() {
           </div>
 
           <div className="mt-8 border-t border-slate-800 pt-6 text-center text-sm text-slate-500">
-            © 2026 RazorCart AI. All rights reserved.
+            Copyright 2026 RazorCart AI. All rights reserved.
           </div>
         </div>
       </footer>
@@ -203,3 +186,4 @@ function App() {
 }
 
 export default App
+

@@ -16,10 +16,14 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      // The backend serves everything under /api (e.g. /api/products), so the
+      // prefix must be forwarded as-is. The previous config rewrote /api away,
+      // which would 404 against the backend. This proxy is only used when
+      // VITE_API_URL is set to a relative path such as "/api"; the default
+      // absolute URL bypasses it entirely.
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

@@ -1,11 +1,28 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-type AuthRole = 'customer' | 'merchant'
+import {
+  AuthUserResponse,
+  extractApiError,
+  fetchCurrentUser,
+  getStoredToken,
+  login as loginRequest,
+  register as registerRequest,
+  storeToken,
+} from '../services/authService'
+
+/**
+ * Real, backend-backed authentication state.
+ *
+ * Credentials are verified by the FastAPI backend; this context only holds
+ * the issued JWT and the profile returned alongside it. No password is ever
+ * stored in the browser.
+ */
 
 export type AuthUser = {
+  id: number
   name: string
   email: string
-  role: AuthRole
+  /** Derived initials used by the header avatar. */
   icon: string
 }
 
@@ -16,24 +33,19 @@ type LoginInput = {
 
 type SignupInput = LoginInput & {
   name: string
-  role?: AuthRole
-}
-
-type StoredUser = AuthUser & {
-  password: string
+  confirmPassword: string
 }
 
 type AuthContextValue = {
   user: AuthUser | null
-  login: (input: LoginInput) => void
-  signup: (input: SignupInput) => void
+  /** True while the stored token is being validated on first load. */
+  isInitialising: boolean
+  login: (input: LoginInput) => Promise<AuthUser>
+  signup: (input: SignupInput) => Promise<AuthUser>
   logout: () => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
-
-const USERS_KEY = 'razorcart_ai_demo_users'
-const SESSION_KEY = 'razorcart_ai_demo_session'
 
 function getAvatar(name: string) {
   const clean = name.trim()
@@ -49,111 +61,99 @@ function getAvatar(name: string) {
   return initials || 'RC'
 }
 
-function readStoredUsers(): StoredUser[] {
-  try {
-    const raw = localStorage.getItem(USERS_KEY)
-    if (!raw) return []
-
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
+function toAuthUser(user: AuthUserResponse): AuthUser {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    icon: getAvatar(user.name),
   }
-}
-
-function writeStoredUsers(users: StoredUser[]) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users))
-}
-
-function readSessionEmail(): string | null {
-  try {
-    return localStorage.getItem(SESSION_KEY)
-  } catch {
-    return null
-  }
-}
-
-function writeSessionEmail(email: string | null) {
-  if (!email) {
-    localStorage.removeItem(SESSION_KEY)
-    return
-  }
-
-  localStorage.setItem(SESSION_KEY, email)
-}
-
-function stripPassword(user: StoredUser): AuthUser {
-  const { password: _password, ...profile } = user
-  return profile
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<AuthUser | null>(null)
+  const [isInitialising, setIsInitialising] = useState(true)
 
+  // Restore the session from a stored token by asking the backend who it
+  // belongs to. An expired or tampered token simply yields no user.
   useEffect(() => {
-    const email = readSessionEmail()
-    if (!email) return
+    let cancelled = false
 
-    const storedUser = readStoredUsers().find(
-      (candidate) => candidate.email.toLowerCase() === email.toLowerCase()
-    )
+    const restore = async () => {
+      const token = getStoredToken()
 
-    if (storedUser) {
-      setUser(stripPassword(storedUser))
+      if (!token) {
+        if (!cancelled) setIsInitialising(false)
+        return
+      }
+
+      try {
+        const profile = await fetchCurrentUser()
+        if (!cancelled) setUser(toAuthUser(profile))
+      } catch {
+        storeToken(null)
+        if (!cancelled) setUser(null)
+      } finally {
+        if (!cancelled) setIsInitialising(false)
+      }
+    }
+
+    void restore()
+
+    return () => {
+      cancelled = true
     }
   }, [])
 
-  useEffect(() => {
-    writeSessionEmail(user?.email ?? null)
-  }, [user])
+  const login = useCallback(async ({ email, password }: LoginInput) => {
+    try {
+      const result = await loginRequest({ email, password })
+      storeToken(result.access_token)
 
-  const login = ({ email, password }: LoginInput) => {
-    const storedUsers = readStoredUsers()
-    const matchedUser = storedUsers.find(
-      (candidate) =>
-        candidate.email.toLowerCase() === email.toLowerCase() &&
-        candidate.password === password
-    )
-
-    if (!matchedUser) {
-      throw new Error('Invalid email or password.')
+      const authUser = toAuthUser(result.user)
+      setUser(authUser)
+      return authUser
+    } catch (error) {
+      storeToken(null)
+      throw new Error(extractApiError(error, 'Unable to sign in right now.'))
     }
+  }, [])
 
-    setUser(stripPassword(matchedUser))
-  }
+  const signup = useCallback(
+    async ({ name, email, password, confirmPassword }: SignupInput) => {
+      try {
+        const result = await registerRequest({
+          name,
+          email,
+          password,
+          confirmPassword,
+        })
+        storeToken(result.access_token)
 
-  const signup = ({ name, email, password, role = 'customer' }: SignupInput) => {
-    const storedUsers = readStoredUsers()
-    const existingUser = storedUsers.find(
-      (candidate) => candidate.email.toLowerCase() === email.toLowerCase()
-    )
+        const authUser = toAuthUser(result.user)
+        setUser(authUser)
+        return authUser
+      } catch (error) {
+        storeToken(null)
+        throw new Error(
+          extractApiError(error, 'Unable to create your account right now.')
+        )
+      }
+    },
+    []
+  )
 
-    if (existingUser) {
-      throw new Error('An account with that email already exists.')
-    }
-
-    const newUser: StoredUser = {
-      name,
-      email,
-      password,
-      role,
-      icon: getAvatar(name),
-    }
-
-    const nextUsers = [...storedUsers, newUser]
-    writeStoredUsers(nextUsers)
-    setUser(stripPassword(newUser))
-  }
-
-  const logout = () => {
+  const logout = useCallback(() => {
+    storeToken(null)
     setUser(null)
-    writeSessionEmail(null)
-  }
+  }, [])
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{ user, isInitialising, login, signup, logout }}
+    >
       {children}
     </AuthContext.Provider>
   )

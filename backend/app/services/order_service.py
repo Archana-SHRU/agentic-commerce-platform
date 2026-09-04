@@ -18,7 +18,9 @@ def get_order(
     stmt = (
         select(Order)
         .where(Order.id == order_id)
-        .options(selectinload(Order.items))
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.product)
+        )
     )
 
     return db.execute(
@@ -38,7 +40,9 @@ def get_orders(
 
     stmt = (
         select(Order)
-        .options(selectinload(Order.items))
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.product)
+        )
         .order_by(Order.created_at.desc())
         .offset(skip)
         .limit(limit)
@@ -165,7 +169,9 @@ def create_order(
         stmt = (
             select(Order)
             .where(Order.id == order.id)
-            .options(selectinload(Order.items))
+            .options(
+                selectinload(Order.items).selectinload(OrderItem.product)
+            )
         )
 
         return db.execute(
@@ -179,3 +185,78 @@ def create_order(
     except Exception:
         db.rollback()
         raise
+
+
+# =========================
+# PAYMENT STATE TRANSITIONS
+# =========================
+
+def attach_razorpay_order(
+    db: Session,
+    *,
+    order_id: int,
+    razorpay_order_id: str,
+) -> Order | None:
+    """
+    Link a local order to the Razorpay order that was just created and move
+    its payment into `processing`.
+
+    This records intent only - `payment_verified` stays False until the
+    signature check in record_payment_result() succeeds.
+    """
+    order = db.get(Order, order_id)
+
+    if order is None:
+        return None
+
+    order.razorpay_order_id = razorpay_order_id
+    order.payment_status = PaymentStatus.processing
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    db.refresh(order)
+    return order
+
+
+def record_payment_result(
+    db: Session,
+    *,
+    order_id: int,
+    razorpay_order_id: str,
+    razorpay_payment_id: str,
+    verified: bool,
+) -> Order | None:
+    """
+    Persist the outcome of a Razorpay signature verification.
+
+    `payment_verified` / `payment_status = successful` are only ever set when
+    `verified` is True. A failed verification marks the payment as failed and
+    leaves the order unconfirmed.
+    """
+    order = db.get(Order, order_id)
+
+    if order is None:
+        return None
+
+    order.razorpay_order_id = razorpay_order_id
+    order.razorpay_payment_id = razorpay_payment_id
+    order.payment_verified = bool(verified)
+
+    if verified:
+        order.payment_status = PaymentStatus.successful
+        order.status = OrderStatus.confirmed
+    else:
+        order.payment_status = PaymentStatus.failed
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    db.refresh(order)
+    return order

@@ -14,6 +14,7 @@ export interface BackendOrderItem {
   id: number
   order_id: number
   product_id: number
+  product_name?: string | null
   quantity: number
   unit_price: number
 }
@@ -26,6 +27,11 @@ export interface BackendOrder {
   status: string
   payment_status: string
   created_at: string
+  // Razorpay tracking. `payment_verified` is set by the backend only after a
+  // successful server-side signature check.
+  razorpay_order_id?: string | null
+  razorpay_payment_id?: string | null
+  payment_verified?: boolean
   items: BackendOrderItem[]
 }
 

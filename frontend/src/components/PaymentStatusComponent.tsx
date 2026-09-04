@@ -1,11 +1,26 @@
 import { Link } from 'react-router-dom'
-import { AlertCircle, CheckCircle, Clock, RefreshCw, ShieldCheck } from 'lucide-react'
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  RefreshCw,
+  ShieldCheck,
+} from 'lucide-react'
+
 import { PaymentStatus } from '../types'
 
 interface PaymentStatusComponentProps {
   status: PaymentStatus
   onRetry?: () => void
 }
+
+const currencyFormatter = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+  maximumFractionDigits: 0,
+})
+
+const formatCurrency = (value: number) => currencyFormatter.format(value)
 
 export const PaymentStatusComponent: React.FC<PaymentStatusComponentProps> = ({
   status,
@@ -15,7 +30,6 @@ export const PaymentStatusComponent: React.FC<PaymentStatusComponentProps> = ({
   const isFailed = status.status === 'failed'
   const isProcessing = status.status === 'processing'
   const isVerified = Boolean(status.verified)
-  const isDemo = status.mode === 'demo' || !isVerified
 
   return (
     <div className="mx-auto max-w-xl overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-xl">
@@ -63,13 +77,13 @@ export const PaymentStatusComponent: React.FC<PaymentStatusComponentProps> = ({
         </p>
 
         <h2 className="text-3xl font-bold text-slate-900">
-          {isSuccessful && 'Payment Successful 🎉'}
+          {isSuccessful && 'Payment Successful'}
           {isFailed && 'Payment Failed'}
           {isProcessing && 'Processing your payment'}
         </h2>
 
         <p className="mt-4 text-lg font-semibold text-slate-900">
-          ₹{status.amount.toLocaleString('en-IN')}
+          {formatCurrency(status.amount)}
         </p>
 
         <div className="mx-auto mt-6 max-w-md text-sm leading-6 text-slate-600">
@@ -77,9 +91,10 @@ export const PaymentStatusComponent: React.FC<PaymentStatusComponentProps> = ({
             <>
               <p>
                 {isVerified
-                  ? 'Your payment has been verified successfully.'
-                  : 'This is a demo checkout result. The payment flow ran in demo mode because backend verification was unavailable.'}
+                  ? 'Your payment has been verified successfully by the backend.'
+                  : 'The payment completed, but verification is still pending.'}
               </p>
+
               {status.transactionId && (
                 <p className="mt-2 text-xs text-slate-500">
                   Transaction ID: {status.transactionId}
@@ -92,7 +107,7 @@ export const PaymentStatusComponent: React.FC<PaymentStatusComponentProps> = ({
             <>
               <p>{status.errorMessage || 'The payment could not be completed.'}</p>
               <p className="mt-2 text-xs text-slate-500">
-                Please try again or contact support.
+                Please try again or contact support if the issue continues.
               </p>
             </>
           )}
@@ -113,7 +128,7 @@ export const PaymentStatusComponent: React.FC<PaymentStatusComponentProps> = ({
           {isSuccessful && (
             <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
               <ShieldCheck size={14} />
-              {isVerified ? 'Verified by backend' : 'Demo verification'}
+              {isVerified ? 'Verified by backend' : 'Waiting for verification'}
             </div>
           )}
         </div>
@@ -122,16 +137,16 @@ export const PaymentStatusComponent: React.FC<PaymentStatusComponentProps> = ({
           {isSuccessful && (
             <>
               <Link
-                to="/products"
+                to="/orders"
                 className="block w-full rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
               >
-                Continue Shopping
+                View Orders
               </Link>
               <Link
-                to="/"
+                to="/products"
                 className="block w-full rounded-2xl bg-slate-100 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-200"
               >
-                Back to Home
+                Continue Shopping
               </Link>
             </>
           )}
@@ -163,3 +178,6 @@ export const PaymentStatusComponent: React.FC<PaymentStatusComponentProps> = ({
     </div>
   )
 }
+
+export default PaymentStatusComponent
+

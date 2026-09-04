@@ -38,6 +38,7 @@ class OrderItemOut(BaseModel):
     id: int
     order_id: int
     product_id: int
+    product_name: str | None = None
     quantity: int
     unit_price: Decimal
 
@@ -58,6 +59,12 @@ class OrderOut(BaseModel):
     status: OrderStatus
     payment_status: PaymentStatus
     created_at: datetime
+
+    # Razorpay payment tracking. `payment_verified` is True only when the
+    # backend successfully verified the Razorpay signature.
+    razorpay_order_id: str | None = None
+    razorpay_payment_id: str | None = None
+    payment_verified: bool = False
 
     items: list[OrderItemOut] = []
 

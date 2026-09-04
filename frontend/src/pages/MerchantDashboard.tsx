@@ -12,14 +12,38 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { fetchMerchantProfile, fetchMerchantOrders } from '../services/merchantService'
 
 export const MerchantDashboard: React.FC = () => {
   const [products, setProducts] = useState(() => getCatalogProducts())
+  const [merchantName, setMerchantName] = useState('')
+  const [orders, setOrders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const handler = () => setProducts(getCatalogProducts())
     window.addEventListener('catalog-updated', handler)
     return () => window.removeEventListener('catalog-updated', handler)
+  }, [])
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        const [merchant, ordersData] = await Promise.all([
+          fetchMerchantProfile(),
+          fetchMerchantOrders(),
+        ])
+
+        setMerchantName(merchant.name)
+        setOrders(ordersData.items)
+      } catch (error) {
+        console.error('Failed to load merchant dashboard:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadDashboard()
   }, [])
 
   const totalProducts = products.length
@@ -39,7 +63,7 @@ export const MerchantDashboard: React.FC = () => {
             <BarChart3 size={32} />
             Merchant Dashboard
           </h1>
-          <p className="text-gray-600 mt-2">Welcome back! Here's your performance overview.</p>
+          <p className="text-gray-600 mt-2">{loading ? 'Loading your dashboard...' : `Welcome back, ${merchantName}! Here's your performance overview.`}</p>
         </div>
 
         {/* Key Metrics */}
@@ -53,7 +77,7 @@ export const MerchantDashboard: React.FC = () => {
           />
           <DashboardCard
             title="Total Orders"
-            value={mockMerchantStats.totalOrders}
+            value={orders.length}
             valueFormat="number"
             trend={15}
             icon={<ShoppingCart className="text-green-600" size={24} />}
@@ -256,3 +280,8 @@ export const MerchantDashboard: React.FC = () => {
     </div>
   )
 }
+
+
+
+
+

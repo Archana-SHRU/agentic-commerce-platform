@@ -77,3 +77,11 @@ dist/
 !.env.example
 *.pem
 *.key
+
+# Virtual environments (never commit; recreate with python -m venv .venv)
+.venv/
+.venv*/
+*/.venv/
+
+# Build output
+frontend/dist/

@@ -1,34 +1,24 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  ShoppingCart,
   Home,
-  Package,
-  Search,
   MessageCircle,
-  User,
   Menu,
-  X,
-  BarChart3,
-  Activity,
+  Package,
   Scale,
+  Search,
+  ShoppingCart,
+  X,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+
 import { useAuth } from '../context/AuthContext'
 import { getCartCount } from '../utils/cartStorage'
 import { getCompareCount } from '../utils/compareStorage'
-import { AuthModal } from './AuthModal'
 
-interface HeaderProps {
-  userRole?: 'customer' | 'merchant'
-}
-
-export const Header: React.FC<HeaderProps> = ({
-  userRole = 'customer',
-}) => {
+export const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [cartCount, setCartCount] = useState(0)
   const [compareCount, setCompareCount] = useState(0)
-  const [showAuthModal, setShowAuthModal] = useState(false)
 
   const location = useLocation()
   const { user, logout } = useAuth()
@@ -58,290 +48,252 @@ export const Header: React.FC<HeaderProps> = ({
     }
   }, [])
 
-  const isActive = (path: string) =>
-    location.pathname === path
+  const isActive = (path: string) => location.pathname === path
+
+  const returnPath =
+    location.pathname === '/login' || location.pathname === '/signup'
+      ? '/'
+      : `${location.pathname}${location.search}`
 
   const customerLinks = [
-    {
-      path: '/',
-      label: 'Home',
-      icon: Home,
-    },
-    {
-      path: '/shop',
-      label: 'Shop',
-      icon: Search,
-    },
-    {
-      path: '/products',
-      label: 'Products',
-      icon: Package,
-    },
-    {
-      path: '/support',
-      label: 'AI Assistant',
-      icon: MessageCircle,
-    },
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/shop', label: 'Shop', icon: Search },
+    { path: '/products', label: 'Products', icon: Package },
+    { path: '/support', label: 'AI Assistant', icon: MessageCircle },
   ]
-
-  const merchantLinks = [
-    {
-      path: '/merchant/dashboard',
-      label: 'Dashboard',
-      icon: BarChart3,
-    },
-    {
-      path: '/merchant/catalog',
-      label: 'Catalog',
-      icon: Package,
-    },
-    {
-      path: '/merchant/orders',
-      label: 'Orders',
-      icon: ShoppingCart,
-    },
-    {
-      path: '/merchant/audit-trail',
-      label: 'Audit Trail',
-      icon: Activity,
-    },
-  ]
-
-  const links =
-    userRole === 'merchant'
-      ? merchantLinks
-      : customerLinks
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <div className="flex justify-between items-center h-16">
-
-          {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center gap-2"
-          >
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">
-                R
-              </span>
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
+              <span className="text-lg font-bold text-white">R</span>
             </div>
 
-            <span className="hidden sm:inline text-lg font-bold text-gray-900">
+            <span className="hidden text-lg font-bold text-gray-900 sm:inline">
               RazorCart AI
             </span>
           </Link>
 
-          {/* Navigation */}
-          <nav
-            className="hidden md:flex items-center gap-1"
-            aria-label="Primary navigation"
-          >
-            {links.map(
-              ({
-                path,
-                label,
-                icon: Icon,
-              }) => (
-                <Link
-                  key={path + label}
-                  to={path}
-                  className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                    isActive(path)
-                      ? 'bg-blue-50 text-blue-600 font-semibold'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <Icon size={18} />
-
-                  <span className="hidden lg:inline text-sm">
-                    {label}
-                  </span>
-
-                  {/* Compare Count */}
-                  {path === '/compare' &&
-                    compareCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-[10px] font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
-                        {compareCount}
-                      </span>
-                    )}
-                </Link>
-              )
-            )}
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
+            {customerLinks.map(({ path, label, icon: Icon }) => (
+              <Link
+                key={path}
+                to={path}
+                className={`group relative flex items-center justify-center rounded-lg p-3 transition-colors ${
+                  isActive(path)
+                    ? 'bg-blue-50 font-semibold text-blue-600'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Icon size={18} />
+                <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-3 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">{label}</span>
+              </Link>
+            ))}
           </nav>
 
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="hidden items-center gap-4 md:flex">
+              <Link
+                to="/compare"
+                className="relative p-1"
+                title="Compare Products"
+                aria-label={`Compare (${compareCount})`}
+              >
+                <Scale size={24} className="text-gray-600 hover:text-purple-600" />
 
-            {userRole === 'customer' && (
-              <div className="hidden md:flex items-center gap-4">
+                {compareCount > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-purple-600 px-1 text-[10px] font-bold text-white">
+                    {compareCount}
+                  </span>
+                )}
+              </Link>
+
+              <Link
+                to="/cart"
+                className="relative p-1"
+                title="Cart"
+                aria-label={`Cart (${cartCount})`}
+              >
+                <ShoppingCart size={24} className="text-gray-600 hover:text-blue-600" />
+
+                {cartCount > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+
+            {user ? (
+              <div className="hidden items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 sm:flex">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+                  {user.icon}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-gray-900">{user.name}</p>
+                  <div className="mt-1 flex items-center gap-3 text-xs">
+                    <Link
+                      to="/orders"
+                      onClick={() => setMenuOpen(false)}
+                      className="text-gray-600 hover:text-blue-600"
+                    >
+                      Orders
+                    </Link>
+                    <Link
+                      to="/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className="text-gray-600 hover:text-blue-600"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={logout}
+                      className="text-red-600 hover:underline"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="hidden items-center gap-2 sm:flex">
                 <Link
-                  to="/compare"
-                  className="relative p-1"
-                  title="Compare Products"
-                  aria-label={`Compare (${compareCount})`}
+                  to="/signup"
+                  state={{ from: returnPath }}
+                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                 >
-                  <Scale
-                    size={24}
-                    className="text-gray-600 hover:text-purple-600"
-                  />
-
-                  {compareCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-[10px] font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
-                      {compareCount}
-                    </span>
-                  )}
+                  Sign up
                 </Link>
 
                 <Link
-                  to="/cart"
-                  className="relative p-1"
-                  title="Cart"
-                  aria-label={`Cart (${cartCount})`}
+                  to="/login"
+                  state={{ from: returnPath }}
+                  className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-200"
                 >
-                  <ShoppingCart
-                    size={24}
-                    className="text-gray-600 hover:text-blue-600"
-                  />
-
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
-                      {cartCount > 99 ? '99+' : cartCount}
-                    </span>
-                  )}
+                  Login
                 </Link>
               </div>
             )}
 
-            {/* Login/User */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen((value) => !value)}
+              className="text-gray-600 md:hidden"
+              aria-label="Toggle navigation menu"
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+
+        {menuOpen && (
+          <nav className="space-y-1 border-t border-gray-200 py-4 md:hidden">
+            {customerLinks.map(({ path, label, icon: Icon }) => (
+              <Link
+                key={path}
+                to={path}
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center justify-between rounded-lg px-4 py-3 ${
+                  isActive(path)
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon size={18} />
+                  {label}
+                </div>
+              </Link>
+            ))}
+
+            <div className="flex gap-3 border-t border-gray-200 px-4 pt-3">
+              <Link
+                to="/compare"
+                onClick={() => setMenuOpen(false)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-purple-50 px-4 py-3 text-purple-700"
+              >
+                <Scale size={18} />
+                Compare
+                {compareCount > 0 && (
+                  <span className="rounded-full bg-purple-600 px-2 text-xs text-white">
+                    {compareCount}
+                  </span>
+                )}
+              </Link>
+
+              <Link
+                to="/cart"
+                onClick={() => setMenuOpen(false)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-blue-50 px-4 py-3 text-blue-700"
+              >
+                <ShoppingCart size={18} />
+                Cart
+                {cartCount > 0 && (
+                  <span className="rounded-full bg-red-500 px-2 text-xs text-white">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+
             {user ? (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  {user.icon}
-                </div>
-
-                <div className="text-sm font-medium text-gray-900">
-                  {user.name}
-                </div>
-
+              <div className="grid gap-2 border-t border-gray-200 px-4 pt-3">
+                <Link
+                  to="/orders"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700"
+                >
+                  Orders
+                </Link>
+                <Link
+                  to="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700"
+                >
+                  Profile
+                </Link>
                 <button
-                  onClick={logout}
-                  className="ml-2 text-xs text-red-600 hover:underline"
+                  type="button"
+                  onClick={() => {
+                    logout()
+                    setMenuOpen(false)
+                  }}
+                  className="rounded-lg bg-rose-50 px-4 py-3 text-left text-sm font-medium text-rose-700"
                 >
                   Logout
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
-              >
-                <User size={18} />
+              <div className="grid gap-2 border-t border-gray-200 px-4 pt-3">
+                <Link
+                  to="/signup"
+                  state={{ from: returnPath }}
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg border border-gray-200 px-4 py-3 text-center text-sm font-medium text-gray-700"
+                >
+                  Sign up
+                </Link>
 
-                <span className="hidden lg:inline text-sm">
+                <Link
+                  to="/login"
+                  state={{ from: returnPath }}
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg bg-gray-100 px-4 py-3 text-center text-sm font-medium text-gray-700"
+                >
                   Login
-                </span>
-              </button>
-            )}
-
-            <AuthModal
-              open={showAuthModal}
-              mode="login"
-              onClose={() => setShowAuthModal(false)}
-            />
-
-            {/* Mobile Menu */}
-            <button
-              onClick={() =>
-                setMenuOpen(!menuOpen)
-              }
-              className="md:hidden text-gray-600"
-            >
-              {menuOpen ? (
-                <X size={24} />
-              ) : (
-                <Menu size={24} />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {menuOpen && (
-          <nav className="md:hidden border-t border-gray-200 py-4 space-y-1">
-
-            {links.map(
-              ({
-                path,
-                label,
-                icon: Icon,
-              }) => (
-                <Link
-                  key={path + label}
-                  to={path}
-                  onClick={() =>
-                    setMenuOpen(false)
-                  }
-                  className={`relative flex items-center justify-between px-4 py-3 rounded-lg ${
-                    isActive(path)
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon size={18} />
-                    {label}
-                  </div>
-
-                  {path === '/compare' &&
-                    compareCount > 0 && (
-                      <span className="bg-purple-600 text-white text-xs font-bold rounded-full min-w-6 h-6 px-2 flex items-center justify-center">
-                        {compareCount}
-                      </span>
-                    )}
                 </Link>
-              )
-            )}
-
-            {userRole === 'customer' && (
-              <div className="flex gap-3 px-4 pt-3 border-t border-gray-200">
-
-                <Link
-                  to="/compare"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 text-purple-700 rounded-lg"
-                >
-                  <Scale size={18} />
-                  Compare
-                  {compareCount > 0 && (
-                    <span className="bg-purple-600 text-white text-xs rounded-full px-2">
-                      {compareCount}
-                    </span>
-                  )}
-                </Link>
-
-                <Link
-                  to="/cart"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg"
-                >
-                  <ShoppingCart size={18} />
-                  Cart
-                  {cartCount > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full px-2">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
-
               </div>
             )}
-
           </nav>
         )}
       </div>
     </header>
   )
 }
+
+
+

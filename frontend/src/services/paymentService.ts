@@ -31,6 +31,10 @@ type RazorpayCheckoutOptions = {
 
 type RazorpayCheckoutInstance = {
   open: () => void
+  on?: (
+    event: 'payment.failed',
+    callback: (response: RazorpayFailureResponse) => void
+  ) => void
 }
 
 type RazorpaySuccessResponse = {
@@ -39,21 +43,30 @@ type RazorpaySuccessResponse = {
   razorpay_signature?: string
 }
 
+type RazorpayFailureResponse = {
+  error?: {
+    description?: string
+    reason?: string
+    metadata?: {
+      payment_id?: string
+      order_id?: string
+    }
+  }
+}
+
 export type PaymentFlowResult =
   | {
       status: 'success'
-      verified: boolean
+      verified: true
       orderId: string
-      paymentId?: string
+      paymentId: string
       amount: number
-      mode: 'live' | 'demo'
     }
   | {
       status: 'failed'
       verified: false
       orderId: string
       amount: number
-      mode: 'live' | 'demo'
       message: string
     }
 
@@ -67,10 +80,12 @@ type CreateOrderResponse = {
   id: string
   amount: number
   currency?: string
+  key_id?: string
 }
 
 type VerifyPaymentResponse = {
   verified?: boolean
+  message?: string
 }
 
 function getApiUrl() {
@@ -107,14 +122,39 @@ function loadRazorpayScript() {
   })
 }
 
+async function readErrorMessage(response: Response, fallback: string) {
+  try {
+    const data = (await response.json()) as {
+      detail?: unknown
+      message?: unknown
+    }
+
+    if (typeof data.detail === 'string' && data.detail.trim()) {
+      return data.detail
+    }
+
+    if (typeof data.message === 'string' && data.message.trim()) {
+      return data.message
+    }
+  } catch {
+    // Ignore parse failures and use the fallback message.
+  }
+
+  return fallback
+}
+
 async function createOrder(payload: {
   amount: number
   currency: string
   items: CartItem[]
   customer: PaymentCustomer
-}): Promise<CreateOrderResponse | null> {
+  backendOrderId?: number
+}): Promise<CreateOrderResponse> {
   const apiUrl = getApiUrl()
-  if (!apiUrl) return null
+
+  if (!apiUrl) {
+    throw new Error('Backend API URL is not configured.')
+  }
 
   try {
     const response = await fetch(`${apiUrl}/payments/create-order`, {
@@ -125,11 +165,22 @@ async function createOrder(payload: {
       body: JSON.stringify(payload),
     })
 
-    if (!response.ok) return null
+    if (!response.ok) {
+      throw new Error(
+        await readErrorMessage(
+          response,
+          'Unable to create the payment order with Razorpay.'
+        )
+      )
+    }
 
     return (await response.json()) as CreateOrderResponse
-  } catch {
-    return null
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error
+    }
+
+    throw new Error('Unable to create the payment order with Razorpay.')
   }
 }
 
@@ -137,9 +188,16 @@ async function verifyPayment(payload: {
   paymentId: string
   orderId: string
   signature?: string
-}): Promise<boolean> {
+  backendOrderId?: number
+}): Promise<VerifyPaymentResponse> {
   const apiUrl = getApiUrl()
-  if (!apiUrl) return false
+
+  if (!apiUrl) {
+    return {
+      verified: false,
+      message: 'Backend API URL is not configured.',
+    }
+  }
 
   try {
     const response = await fetch(`${apiUrl}/payments/verify`, {
@@ -150,13 +208,40 @@ async function verifyPayment(payload: {
       body: JSON.stringify(payload),
     })
 
-    if (!response.ok) return false
+    if (!response.ok) {
+      return {
+        verified: false,
+        message: await readErrorMessage(
+          response,
+          'Payment signature verification failed.'
+        ),
+      }
+    }
 
     const data = (await response.json()) as VerifyPaymentResponse
-    return Boolean(data.verified)
+
+    return {
+      verified: Boolean(data.verified),
+      message:
+        data.message ||
+        (data.verified
+          ? 'Payment signature verified successfully'
+          : 'Payment signature verification failed'),
+    }
   } catch {
-    return false
+    return {
+      verified: false,
+      message: 'Unable to verify the payment with the backend.',
+    }
   }
+}
+
+function getFailureMessage(response: RazorpayFailureResponse) {
+  return (
+    response.error?.description ||
+    response.error?.reason ||
+    'Payment could not be completed.'
+  )
 }
 
 export async function startRazorpayCheckout(payload: {
@@ -166,37 +251,69 @@ export async function startRazorpayCheckout(payload: {
   customer: PaymentCustomer
   receipt?: string
   notes?: Record<string, string>
+  backendOrderId?: number
 }): Promise<PaymentFlowResult> {
-  const key = getKeyId()
   const currency = payload.currency || 'INR'
   const scriptLoaded = await loadRazorpayScript()
+
+  if (!scriptLoaded) {
+    return {
+      status: 'failed',
+      verified: false,
+      orderId: 'pending',
+      amount: payload.amount,
+      message: 'Unable to load the Razorpay Checkout script.',
+    }
+  }
+
   const createdOrder = await createOrder({
     amount: payload.amount,
     currency,
     items: payload.items,
     customer: payload.customer,
+    backendOrderId: payload.backendOrderId,
   })
 
-  const orderId = createdOrder?.id || `demo_${Date.now().toString(36)}`
+  const key = getKeyId() || createdOrder.key_id || ''
 
-  if (!scriptLoaded || !key || !window.Razorpay) {
+  if (!key) {
     return {
-      status: 'success',
+      status: 'failed',
       verified: false,
-      orderId,
+      orderId: createdOrder.id,
       amount: payload.amount,
-      mode: 'demo',
+      message: 'Razorpay public key is not configured on the frontend.',
+    }
+  }
+
+  const RazorpayCheckout = window.Razorpay
+
+  if (!RazorpayCheckout) {
+    return {
+      status: 'failed',
+      verified: false,
+      orderId: createdOrder.id,
+      amount: payload.amount,
+      message: 'Razorpay Checkout is not available in the browser.',
     }
   }
 
   return new Promise<PaymentFlowResult>((resolve) => {
-    const checkout = new window.Razorpay({
+    let settled = false
+
+    const settle = (result: PaymentFlowResult) => {
+      if (settled) return
+      settled = true
+      resolve(result)
+    }
+
+    const checkout = new RazorpayCheckout({
       key,
-      amount: createdOrder?.amount || payload.amount,
+      amount: createdOrder.amount,
       currency,
       name: 'RazorCart AI',
       description: 'AI-powered shopping. Razorpay-powered checkout.',
-      order_id: createdOrder?.id,
+      order_id: createdOrder.id,
       prefill: {
         name: payload.customer.name,
         email: payload.customer.email,
@@ -207,35 +324,79 @@ export async function startRazorpayCheckout(payload: {
         color: '#2563eb',
       },
       handler: async (response) => {
-        const verified = await verifyPayment({
+        const verification = await verifyPayment({
           paymentId: response.razorpay_payment_id,
-          orderId: response.razorpay_order_id || orderId,
+          orderId: response.razorpay_order_id || createdOrder.id,
           signature: response.razorpay_signature,
+          backendOrderId: payload.backendOrderId,
         })
 
-        resolve({
-          status: 'success',
-          verified,
-          orderId: response.razorpay_order_id || orderId,
-          paymentId: response.razorpay_payment_id,
+        if (verification.verified) {
+          settle({
+            status: 'success',
+            verified: true,
+            orderId: response.razorpay_order_id || createdOrder.id,
+            paymentId: response.razorpay_payment_id,
+            amount: payload.amount,
+          })
+          return
+        }
+
+        settle({
+          status: 'failed',
+          verified: false,
+          orderId: response.razorpay_order_id || createdOrder.id,
           amount: payload.amount,
-          mode: verified ? 'live' : 'demo',
+          message:
+            verification.message ||
+            'Payment signature verification failed.',
         })
       },
       modal: {
         ondismiss: () => {
-          resolve({
+          settle({
             status: 'failed',
             verified: false,
-            orderId,
+            orderId: createdOrder.id,
             amount: payload.amount,
-            mode: createdOrder ? 'live' : 'demo',
-            message: 'Payment was cancelled before completion.',
+            message: 'Payment was closed before completion.',
           })
         },
       },
     })
 
+    checkout.on?.('payment.failed', async (response) => {
+      const orderId = response.error?.metadata?.order_id || createdOrder.id
+      const paymentId = response.error?.metadata?.payment_id
+
+      if (paymentId) {
+        const verification = await verifyPayment({
+          paymentId,
+          orderId,
+          backendOrderId: payload.backendOrderId,
+        })
+
+        settle({
+          status: 'failed',
+          verified: false,
+          orderId,
+          amount: payload.amount,
+          message:
+            verification.message || getFailureMessage(response),
+        })
+        return
+      }
+
+      settle({
+        status: 'failed',
+        verified: false,
+        orderId,
+        amount: payload.amount,
+        message: getFailureMessage(response),
+      })
+    })
+
     checkout.open()
   })
 }
+

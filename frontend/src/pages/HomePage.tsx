@@ -5,7 +5,6 @@ import {
   CreditCard,
   ShieldCheck,
   Sparkles,
-  Search,
   Scale,
   TrendingUp,
   Zap,
@@ -22,7 +21,6 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate()
   const aiSectionRef = useRef<HTMLDivElement>(null)
 
-  const [search, setSearch] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [catalogProducts, setCatalogProducts] = useState<Product[]>(() =>
@@ -82,7 +80,7 @@ export const HomePage: React.FC = () => {
     []
   )
 
-  const doSearch = (value = search) => {
+  const doSearch = (value: string) => {
     const query = value.trim()
     if (!query) return
 

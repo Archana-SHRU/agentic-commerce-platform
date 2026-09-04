@@ -5,7 +5,10 @@ import { getStockImageForCategory } from './productImages'
 export const CATALOG_STORAGE_KEY = 'merchant_catalog_products'
 export const CATALOG_UPDATED_EVENT = 'catalog-updated'
 
-const API_URL = 'http://localhost:8000'
+// Derived from VITE_API_URL so a deployed build never points at localhost.
+// VITE_API_URL already includes the /api suffix (e.g. https://api.example.com/api);
+// falls back to a same-origin relative path when it is not set.
+const API_URL = (import.meta.env.VITE_API_URL?.trim() || '/api').replace(/\/+$/, '')
 
 interface BackendProduct {
   id: number

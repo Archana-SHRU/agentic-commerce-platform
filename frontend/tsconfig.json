@@ -23,11 +23,11 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Path aliases */
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],
+  "exclude": ["src/**/*.backup.ts", "src/**/*.backup.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

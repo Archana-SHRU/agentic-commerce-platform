@@ -7,6 +7,8 @@ All models are imported here so that:
 2. String-based relationship references (e.g. "Product") resolve correctly.
 """
 from app.models.enums import OrderStatus, PaymentStatus  # noqa: F401
+from app.models.user import User  # noqa: F401
+from app.models.password_reset_token import PasswordResetToken  # noqa: F401
 from app.models.merchant import Merchant  # noqa: F401
 from app.models.product import Product  # noqa: F401
 from app.models.order import Order  # noqa: F401
@@ -16,6 +18,8 @@ from app.models.audit_log import AuditLog  # noqa: F401
 __all__ = [
     "OrderStatus",
     "PaymentStatus",
+    "User",
+    "PasswordResetToken",
     "Merchant",
     "Product",
     "Order",

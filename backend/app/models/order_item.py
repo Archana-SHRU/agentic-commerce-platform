@@ -21,5 +21,17 @@ class OrderItem(Base):
     order: Mapped["Order"] = relationship("Order", back_populates="items")
     product: Mapped["Product"] = relationship("Product", back_populates="order_items")
 
+    @property
+    def product_name(self) -> str | None:
+        """
+        Convenience accessor used by the order/confirmation API responses.
+
+        Returns None when the product relationship has not been loaded or the
+        product row no longer exists, so responses degrade gracefully instead
+        of raising.
+        """
+        product = self.product
+        return product.name if product is not None else None
+
     def __repr__(self) -> str:  # pragma: no cover
         return f"<OrderItem id={self.id} order_id={self.order_id} product_id={self.product_id}>"

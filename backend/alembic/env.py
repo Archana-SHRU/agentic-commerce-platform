@@ -13,7 +13,7 @@ sys.path.insert(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )
 
-from app.core.config import settings
+from app.core.config import require_database_url
 from app.db.base import Base
 import app.models  # noqa: F401 (registers all models onto Base.metadata)
 
@@ -23,9 +23,11 @@ config = context.config
 
 # Inject the real DB URL from application settings (.env).
 # Escape '%' because Alembic uses ConfigParser internally.
+# require_database_url() raises an actionable error naming the .env paths it
+# searched, rather than letting alembic fail with an empty URL.
 config.set_main_option(
     "sqlalchemy.url",
-    settings.DATABASE_URL.replace("%", "%%")
+    require_database_url().replace("%", "%%")
 )
 
 # Interpret the config file for Python logging.

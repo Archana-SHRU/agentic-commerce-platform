@@ -1,6 +1,6 @@
 # AI-Powered Agentic Commerce Platform
 
-
+Production-quality AI commerce platform built for **Razorpay Buildathon 2026**.
 
 ## Problem Statement
 
