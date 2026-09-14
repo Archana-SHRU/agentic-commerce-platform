@@ -8,7 +8,6 @@ import {
   Scale,
   Search,
   ShoppingCart,
-  User,
   X,
 } from 'lucide-react'
 

@@ -1,12 +1,28 @@
 import axios from 'axios'
 
-const configuredBaseURL = import.meta.env.VITE_API_URL?.trim()
+/**
+ * Resolves the backend API base URL with a guaranteed `/api` prefix.
+ *
+ * Prevents route mismatches (such as hitting `/products` instead of `/api/products`),
+ * while safely avoiding duplicate `/api/api` prefixes if `/api` is already included:
+ * - Bare host (e.g. `https://example.com` or `https://example.com/`) -> `https://example.com/api`
+ * - Host with `/api` (e.g. `https://example.com/api` or `/api/`)   -> `https://example.com/api`
+ * - Same-origin relative path (e.g. `/api`)                        -> `/api`
+ * - Unset in development                                           -> `http://localhost:8000/api`
+ * - Unset in production                                            -> `/api`
+ */
+export function getApiBaseUrl(): string {
+  const configured = import.meta.env.VITE_API_URL?.trim()
 
-// In development, fall back to the local backend for convenience. In a
-// production build, fall back to a same-origin relative path instead so a
-// missing VITE_API_URL can never point the deployed site at localhost.
-const baseURL =
-  configuredBaseURL || (import.meta.env.DEV ? 'http://localhost:8000/api' : '/api')
+  if (configured) {
+    const clean = configured.replace(/\/+$/, '')
+    return clean.endsWith('/api') ? clean : `${clean}/api`
+  }
+
+  return import.meta.env.DEV ? 'http://localhost:8000/api' : '/api'
+}
+
+export const baseURL = getApiBaseUrl()
 
 const api = axios.create({
   baseURL,

@@ -120,7 +120,7 @@ Set at **build time** (Vite inlines `VITE_*` into the bundle):
 
 | Variable | Value |
 |---|---|
-| `VITE_API_URL` | `https://your-backend-domain/api` (note the `/api` suffix) |
+| `VITE_API_URL` | `https://agentic-commerce-backend-x8sm.onrender.com` (the frontend automatically ensures `/api` without `/api/api` duplicates) |
 | `VITE_RAZORPAY_KEY_ID` | public key id only (`rzp_live_...`) |
 
 Never put `SECRET_KEY`, `RAZORPAY_KEY_SECRET`, `SMTP_PASSWORD` or

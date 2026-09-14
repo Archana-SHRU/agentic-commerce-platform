@@ -1,4 +1,5 @@
 import { CartItem } from '../types'
+import { getApiBaseUrl } from './api'
 
 declare global {
   interface Window {
@@ -89,7 +90,7 @@ type VerifyPaymentResponse = {
 }
 
 function getApiUrl() {
-  return import.meta.env.VITE_API_URL?.trim() || ''
+  return getApiBaseUrl()
 }
 
 function getKeyId() {

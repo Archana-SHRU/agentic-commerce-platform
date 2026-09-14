@@ -12,12 +12,16 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { fetchMerchantProfile, fetchMerchantOrders } from '../services/merchantService'
+import {
+  fetchMerchantProfile,
+  fetchMerchantOrders,
+  MerchantOrder,
+} from '../services/merchantService'
 
 export const MerchantDashboard: React.FC = () => {
   const [products, setProducts] = useState(() => getCatalogProducts())
   const [merchantName, setMerchantName] = useState('')
-  const [orders, setOrders] = useState<any[]>([])
+  const [orders, setOrders] = useState<MerchantOrder[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
