@@ -52,10 +52,15 @@ migrations/
 .DS_Store
 Thumbs.db
 
-# Environment
+# Environment & Secrets (all .env files and extensions)
 .env
+.env*
+*.env*
+.env.*
 .env.local
 .env.*.local
+.env.example
+*.env.example
 
 # Logs
 logs/
@@ -73,8 +78,6 @@ dist/
 *.egg-info/
 
 # Secrets and API Keys
-.env.*
-!.env.example
 *.pem
 *.key
 
@@ -86,4 +89,3 @@ dist/
 # Build output
 frontend/dist/
 .vercel
-.env*
